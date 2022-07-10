@@ -1,0 +1,36 @@
+server:
+  port: ${PORT_CONFIG_SERVER:8888}
+spring:
+  application:
+    name: config-server
+  cloud:
+    config:
+      server:
+        git:
+          uri: https://github.com/NelsonKobayashi/CTD-Backend-Avaliacao2
+          default-label: main
+          search-paths: 'cloudConfig*'
+
+eureka:
+  instance:
+    hostname: eureka-service
+  client:
+    registerWithEureka: true
+    fetchRegistry: true
+    service-url:
+      defaultZone: http://${eureka.instance.hostname}:8761/eureka
+
+management:
+  info:
+    env:
+      enabled: true
+  endpoints:
+    web:
+      exposure:
+        include: health,info
+
+info:
+  name: Configuracao dos servicos
+  author: Nelson Kobayashi
+  mail: koba.nelson@gmail.com
+  severity: Alto

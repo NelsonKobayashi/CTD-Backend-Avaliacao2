@@ -1,0 +1,5 @@
+server:
+  port: ${PORT:8085}
+
+zipkin:
+  base-url: http://zipkin:9411/

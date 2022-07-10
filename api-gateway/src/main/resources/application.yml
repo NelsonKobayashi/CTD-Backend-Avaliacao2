@@ -1,0 +1,90 @@
+spring:
+  application:
+    name: api-gateway
+  config:
+    import: optional:configserver:http://config-service:8888}
+
+  zipkin:
+    base-url: http://zipkin-service:9411/
+  cloud:
+    config:
+      profile: ${PROFILE:dev}
+    gateway:
+      discovery:
+        locator:
+          enabled: true
+          lower-case-service-id: true
+      routes:
+        - id: movieRoute
+          uri: lb://MOVIE-SERVICE:8084
+          predicates:
+            - Path=/movies/**
+          filters:
+            - name: CircuitBreaker
+              args:
+                name: movieService
+                fallbackUri: forward:/fallback/movies
+        - id: serieRoute
+          uri: lb://SERIE-SERVICE:8085
+          predicates:
+            - Path=/series/**
+          filters:
+            - name: CircuitBreaker
+              args:
+                name: serieService
+                fallbackUri: forward:/fallback/series
+        - id: catalogRoute
+          uri: lb://CATALOG-SERVICE:8086
+          predicates:
+            - Path=/catalog/**
+          filters:
+            - name: CircuitBreaker
+              args:
+                name: catalogService
+                fallbackUri: forward:/fallback/catalog
+  security:
+    oauth2:
+      client:
+        registration:
+          google:
+            client-id: 319091204165-8uvj68q57tv7g8kh4mnt81sm2uhbhsv0.apps.googleusercontent.com
+            client-secret: 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
+            scope: openid
+            redirect-uri: http://localhost:8080/login/oauth2/code/google
+resilience4j.circuitbreaker:
+  configs:
+    default:
+      recordExceptions:
+        - org.springframework.web.client.HttpServerErrorException
+        - java.util.concurrent.TimeoutException
+        - java.io.IOException
+  instances:
+    apigateway:
+      baseConfig: default
+
+eureka:
+  instance:
+    hostname: eureka-service
+  client:
+    registerWithEureka: true
+    fetchRegistry: true
+    service-url:
+      defaultZone: http://${eureka.instance.hostname}:8761/eureka
+
+management:
+  info:
+    env:
+      enabled: true
+  endpoints:
+    web:
+      exposure:
+        include: health,info
+
+info:
+  name: Servico de API Gateway
+  author: Nelson Kobayashi
+  mail: koba.nelson@gmail.com
+  severity: Alto
+
+
+

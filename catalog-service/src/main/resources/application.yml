@@ -1,0 +1,48 @@
+spring:
+  application:
+    name: catalog-service
+  config:
+    import: optional:configserver:http://config-service:8888
+  cloud:
+    config:
+      profile: ${PROFILE:dev}
+  data:
+    mongodb:
+      uri: mongodb://test:7890123@locallhost:27019/avaliacao2_catalog
+
+    rabbitmq:
+      username: ${RABBIT_USERNAME:guest}
+      password: ${RABBIT_PASSWORD:guest}
+      host: localhost
+      port: 5672
+
+eureka:
+  instance:
+    hostname: eureka-service
+  client:
+    registerWithEureka: true
+    fetchRegistry: true
+    service-url:
+      defaultZone: http://${eureka.instance.hostname}:8761/eureka
+
+queues:
+  api-serie:
+    name: serieQueue
+  api-movie:
+    name: movieQueue
+
+management:
+  info:
+    env:
+      enabled: true
+  endpoints:
+    web:
+      exposure:
+        include: health,info
+
+info:
+  info:
+    name: Microserviço de Catalog Service
+    author: Nelson Kobayashi
+    mail: koba.nelson@gmail.com
+    severity: Alto

@@ -1,0 +1,105 @@
+version: '3.9'
+
+services:
+  zipkin:
+    image: openzipkin/zipkin:2
+    restart: always
+    ports:
+      - "9411:9411"
+  rabbitmq:
+    image: rabbitmq:management
+    restart: always
+    ports:
+      - "5672:5672"
+      - "15672:15672"
+  eureka-service:
+    build: eureka-server
+    container_name: eureka-service
+    restart: always
+    depends_on:
+      - zipkin
+    ports:
+      - "8761:8761"
+  config-service:
+    build: config-server
+    container_name: config-service
+    restart: always
+    depends_on:
+      - eureka-server
+    ports:
+      - "8888:8888"
+  api-gateway:
+    build: api-gateway
+    container_name: api-gateway
+    restart: always
+    depends_on:
+      - config-service
+      - movie-service
+      - serie-service
+      - catalog-service
+    ports:
+      - "8080:8080"
+
+  movie-service:
+    build: movie-service
+    restart: always
+    ports:
+      - "8084:8084"
+    depends_on:
+      - db_avaliacao2_movie
+  serie-service:
+    build: serie-service
+    restart: always
+    ports:
+      - "8085:8085"
+    depends_on:
+      - db-avaliacao2-serie
+  catalog-service:
+    build: catalog-service
+    restart: always
+    ports:
+      - "8086:8086"
+    depends_on:
+      - movie-service
+      - serie-service
+      - db-avaliacao2-catalog
+  db-avaliacao2-movie:
+    image: mysql:8.0
+    container_name: "db_avaliacao2_movie"
+    restart: always
+    environment:
+      MYSQL_ROOT_PASSWORD: 7890123
+    volumes:
+      - ./dbScript:/docker-entrypoint-initdb.d/mysql-movie-init.sql
+      - ./mysql-movie-volume:/var/lib/mysql
+    ports:
+      - "3307:3306"
+  db-avaliacao2-serie:
+    image: mongo:4.4.2
+    container_name: "db-avaliacao2-serie"
+    restart: always
+    environment:
+      MONGO_INITDB_DATABASE: avaliacao2_serie
+      MONGO_INITDB_ROOT_USERNAME: test
+      MONGO_INITDB_ROOT_PASSWORD: 7890123
+    volumes:
+      - ./dbScript:/docker-entrypoint-initdb.d/mongo-serie-init.js:ro
+      - ./mongo-serie-volume:/data/db
+    ports:
+      - "27018:27017"
+  db-avaliacao2-catalog:
+    image: mongo:4.4.2
+    container_name: "db-avaliacao2-catalog"
+    restart: always
+    environment:
+      MONGO_INITDB_DATABASE: avaliacao2_catalog
+      MONGO_INITDB_ROOT_USERNAME: test
+      MONGO_INITDB_ROOT_PASSWORD: 7890123
+    volumes:
+      - ./dbScript:/docker-entrypoint-initdb.d/mongo-catalog-init.js:ro
+      - ./mongo-catalog-volume:/data/db
+    ports:
+      - "27019:27017"
+
+volumes:
+  step:

@@ -1,0 +1,46 @@
+spring:
+  application:
+    name: serie-service
+  config:
+    import: optional:configserver:http://config-service:8888
+
+  cloud:
+    config:
+      profile: ${PROFILE:dev}
+  data:
+    mongodb:
+      uri: mongodb://test:7890123@db-avaliacao2-serie:27017/avaliacao2_serie
+
+  rabbitmq:
+    username: ${RABBIT_USERNAME:guest}
+    password: ${RABBIT_PASSWORD:guest}
+    host: localhost
+    port: 5672
+eureka:
+  instance:
+    hostname: eureka-service
+
+  client:
+    registerWithEureka: true
+    fetchRegistry: true
+    service-url:
+      defaultZone: http://${eureka.instance.hostname}:8761/eureka
+
+queue:
+  api-serie:
+    name: serieQueue
+
+management:
+  info:
+    env:
+      enabled: true
+  endpoints:
+    web:
+      exposure:
+        include: health,info
+
+info:
+  name: Servico de Series
+  author: Nelson Kobayashi
+  mail: koba.nelson@gmail.com
+  severity: Alto
